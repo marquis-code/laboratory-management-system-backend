@@ -4,11 +4,15 @@ RUN corepack enable && corepack prepare pnpm@12.11.2 --activate
 WORKDIR /app
 
 # Copy dependency manifests
-COPY package.json ./
+COPY package.json pnpm-workspace.yaml ./
 COPY shared/package.json ./shared/
 RUN pnpm install --ignore-scripts
 
 COPY . .
+
+# Build shared package first (its dist/ is gitignored so must be compiled here)
+RUN pnpm --dir shared run build
+# Then build the backend
 RUN pnpm run build
 
 FROM node:22-alpine AS runner

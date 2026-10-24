@@ -2,7 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "strict": true,
@@ -28,13 +30,19 @@
     "baseUrl": ".",
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "paths": {
-      "@lims/shared": ["./shared/src/index.ts"]
-    }
+    "noUnusedParameters": false
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "shared/src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
