@@ -140,7 +140,10 @@ const envSchema = z
       }
     }
 
-    if (value.NOTIFICATIONS_MODE === 'live' && (value.EMAIL_PROVIDER === 'smtp' || value.EMAIL_PROVIDER === 'resend')) {
+    if (
+      value.NOTIFICATIONS_MODE === 'live' &&
+      (value.EMAIL_PROVIDER === 'smtp' || value.EMAIL_PROVIDER === 'resend')
+    ) {
       if (value.EMAIL_PROVIDER === 'resend') {
         if (!value.RESEND_API_KEY && !value.SMTP_PASS) {
           ctx.addIssue({

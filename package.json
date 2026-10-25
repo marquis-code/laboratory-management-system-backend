@@ -18,7 +18,9 @@
     "bootstrap:superadmin": "ts-node src/seed/bootstrap-superadmin.ts",
     "bootstrap:superadmin:dist": "node dist/seed/bootstrap-superadmin.js",
     "migrate:phase15": "ts-node src/migrations/phase15-backfill.ts",
-    "migrate:phase15:dist": "node dist/migrations/phase15-backfill.js"
+    "migrate:phase15:dist": "node dist/migrations/phase15-backfill.js",
+    "seed:demo-users": "ts-node src/seed/demo-users.ts",
+    "seed:demo-users:dist": "node dist/seed/demo-users.js"
   },
   "dependencies": {
     "@lims/shared": "workspace:*",

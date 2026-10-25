@@ -255,7 +255,7 @@ export class NotificationService {
       ? (this.config.get<number>('SMTP_PORT') ?? 465)
       : (this.config.get<number>('SMTP_PORT') ?? 587);
     const secure = isResend
-      ? (this.config.get<boolean>('SMTP_SECURE') ?? (port === 465))
+      ? (this.config.get<boolean>('SMTP_SECURE') ?? port === 465)
       : (this.config.get<boolean>('SMTP_SECURE') ?? false);
     const user = isResend ? 'resend' : this.config.get<string>('SMTP_USER');
     const pass = isResend
