@@ -14,7 +14,7 @@ There is **one frontend application**: `frontends/web` (Nuxt 3 / Vue 3). It cont
 
 Deploy this as **one Vercel project**. Do not split it into separate frontend repositories for deployment; the route groups share authentication, API client, layout and PWA runtime.
 
-Backend: one NestJS API (`backend`) on Railway. MongoDB and Redis are managed services.
+Backend: one NestJS API (`lmis-api`) on Railway. MongoDB and Redis are managed services.
 
 ## Repository layout for deployment
 
@@ -29,15 +29,15 @@ histopathology-lims (GitHub)
 └─ railway.json
 ```
 
-Vercel project root: **repository root** (recommended, zero-config via root `vercel.json`) or set root directory to `frontend`.
+Vercel project root: **repository root** (recommended, zero-config via root `vercel.json`) or set root directory to `lmis-web`.
 
 ## Frontend — Vercel
 
 1. Vercel → **Add New Project** → import the GitHub repository.
-2. Set **Root Directory** to the repository root (or `frontend`).
+2. Set **Root Directory** to the repository root (or `lmis-web`).
 3. Framework preset: **Nuxt.js** (or Other if using root `vercel.json`).
 4. Build command/output:
-   - output: `frontend/.output/public` (or `.output/public` if Root Directory is `frontend`)
+   - output: `lmis-web/.output/public` (or `.output/public` if Root Directory is `lmis-web`)
 5. Add Production environment variables:
 
 | Variable                    | Example                                          |
@@ -54,11 +54,11 @@ Public runtime variables are **baked in at build time**. Changing `NUXT_PUBLIC_A
 
 ## Backend — Railway
 
-1. Create a Railway project from the same GitHub repository. Railway reads `railway.json` and builds `backend/api/Dockerfile`.
+1. Create a Railway project from the same GitHub repository. Railway reads `railway.json` and builds `lmis-api/api/Dockerfile`.
 2. Add a **Redis** service and expose `REDIS_URL` to the API service.
 3. Use **MongoDB Atlas** (recommended) or a MongoDB replica set. The API uses transactions for accessioning, custody and onboarding; a standalone MongoDB will fail those operations. Set `MONGODB_URI` to the replica-set connection string.
 4. Add a **persistent volume** mounted at `/data` and set `STORAGE_DIR=/data/storage`. The container entrypoint repairs ownership and drops to the non-root `node` user. Without a volume, generated PDFs disappear on redeploy.
-5. Add API environment variables from [`backend/api/.env.production.example`](../backend/api/.env.production.example). Minimum required:
+5. Add API environment variables from [`lmis-api/api/.env.production.example`](../lmis-api/api/.env.production.example). Minimum required:
 
 | Variable                                   | Value                                 |
 | ------------------------------------------ | ------------------------------------- |
