@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class PortalRequestDto {
-  @ApiProperty({ example: 'HISTO' })
+  @ApiProperty({ example: 'LAGOS' })
   @IsString()
   @MinLength(2)
   @MaxLength(32)
@@ -15,7 +15,7 @@ export class PortalRequestDto {
 }
 
 export class PortalVerifyDto {
-  @ApiProperty({ example: 'HISTO' })
+  @ApiProperty({ example: 'LAGOS' })
   @IsString()
   @MinLength(2)
   @MaxLength(32)

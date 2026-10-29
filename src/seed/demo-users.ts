@@ -5,21 +5,21 @@ import { LabModelName, LabSchema, type LabEntity } from '../core/labs/lab.schema
 const demoUsers = [
   {
     name: 'Dr. Kunle Adeyemi',
-    email: 'chemistry@histo.ng',
+    email: 'chemistry@lagoslab.ng',
     password: 'Chemistry#2026',
     role: 'SCIENTIST' as const,
     disciplines: ['CHEMICAL_PATHOLOGY'] as const,
   },
   {
     name: 'Dr. Ngozi Eze',
-    email: 'haematology@histo.ng',
+    email: 'haematology@lagoslab.ng',
     password: 'Haematology#2026',
     role: 'SCIENTIST' as const,
     disciplines: ['HAEMATOLOGY'] as const,
   },
   {
     name: 'Dr. Ada Nwosu',
-    email: 'microbiology@histo.ng',
+    email: 'microbiology@lagoslab.ng',
     password: 'Microbiology#2026',
     role: 'SCIENTIST' as const,
     disciplines: ['MICROBIOLOGY'] as const,
@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   await mongoose.connect(uri);
   const LabModel = mongoose.model<LabEntity>(LabModelName, LabSchema);
   const lab = await LabModel.findOne({
-    code: (process.env.DEMO_LAB_CODE ?? 'HISTO').toUpperCase(),
+    code: (process.env.DEMO_LAB_CODE ?? 'LAGOS').toUpperCase(),
   }).exec();
   if (!lab)
     throw new Error('Demo laboratory not found. Run the main seed first or set DEMO_LAB_CODE.');

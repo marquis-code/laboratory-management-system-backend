@@ -83,7 +83,7 @@ import {
 
 const HOUR = 3_600_000;
 const DAY = 86_400_000;
-const LAB_CODE = 'HISTO';
+const LAB_CODE = 'LAGOS';
 
 type Stage =
   | 'RECEIVED'
@@ -740,7 +740,7 @@ export async function seedDatabase(): Promise<void> {
         address: '12 Oba Akran Avenue, Ikeja',
         phone: '+234 802 555 0198',
         email: 'admin@lagoscentral.ng',
-        website: 'lagoscentralhisto.ng',
+        website: 'lagoscentrallagoslab.ng',
         trialEndsAt: null,
         notes: 'Demo hospital group with one laboratory.',
         createdAt: now,
@@ -752,10 +752,10 @@ export async function seedDatabase(): Promise<void> {
   const lab = await LabModel.create({
     organizationId: organization?._id,
     code: LAB_CODE,
-    name: 'Lagos Central Histopathology Laboratory',
+    name: 'Lagos Central Medical Laboratory',
     address: '12 Oba Akran Avenue, Ikeja, Lagos, Nigeria',
     phone: '+234 802 555 0198',
-    email: 'reports@lagoscentralhisto.ng',
+    email: 'reports@lagoscentrallagoslab.ng',
     accessionPrefix: 'HP',
     accessionFormat: '{PREFIX}-{YYYY}-{SEQ:6}',
     tatHours: { FROZEN: 1, URGENT: 24, ROUTINE: 72 },
@@ -767,14 +767,14 @@ export async function seedDatabase(): Promise<void> {
     accessionPrefixes: {},
     letterhead: {
       phone: '+234 802 555 0198',
-      email: 'reports@lagoscentralhisto.ng',
-      website: 'lagoscentralhisto.ng',
+      email: 'reports@lagoscentrallagoslab.ng',
+      website: 'lagoscentrallagoslab.ng',
       pathologistName: 'Dr Adaeze Okafor',
       pathologistTitle: 'Consultant Histopathologist',
       qualifications: 'MBBS, FMCPath (Histopathology)',
       signatureText: 'Electronically signed in accordance with laboratory policy.',
       footerNote:
-        'Lagos Central Histopathology Laboratory · Confidential clinical record · Verify this report with the QR code.',
+        'Lagos Central Medical Laboratory · Confidential clinical record · Verify this report with the QR code.',
     },
   });
 
@@ -806,7 +806,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'super',
         name: 'System Administrator',
-        email: 'superadmin@histo.ng',
+        email: 'superadmin@lagoslab.ng',
         password: 'SuperAdmin#2026',
         role: 'SUPER_ADMIN',
         subspecialties: [],
@@ -814,7 +814,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'admin',
         name: 'Folake Ogunleye',
-        email: 'admin@histo.ng',
+        email: 'admin@lagoslab.ng',
         password: 'LabAdmin#2026',
         role: 'LAB_ADMIN',
         subspecialties: [],
@@ -822,7 +822,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'reception',
         name: 'Blessing Okon',
-        email: 'reception@histo.ng',
+        email: 'reception@lagoslab.ng',
         password: 'Reception#2026',
         role: 'RECEPTIONIST',
         subspecialties: [],
@@ -830,7 +830,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'grosser',
         name: 'Sani Abdullahi',
-        email: 'grosser@histo.ng',
+        email: 'grosser@lagoslab.ng',
         password: 'Grosser#2026',
         role: 'GROSSER',
         subspecialties: [],
@@ -838,7 +838,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'phleb',
         name: 'Amina Yusuf',
-        email: 'phlebotomist@histo.ng',
+        email: 'phlebotomist@lagoslab.ng',
         password: 'Phlebotomist#2026',
         role: 'PHLEBOTOMIST',
         subspecialties: [],
@@ -846,7 +846,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'scientist',
         name: 'Tunde Balogun',
-        email: 'scientist@histo.ng',
+        email: 'scientist@lagoslab.ng',
         password: 'Scientist#2026',
         role: 'SCIENTIST',
         subspecialties: [],
@@ -855,7 +855,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'chemistry',
         name: 'Dr. Kunle Adeyemi',
-        email: 'chemistry@histo.ng',
+        email: 'chemistry@lagoslab.ng',
         password: 'Chemistry#2026',
         role: 'SCIENTIST',
         subspecialties: [],
@@ -864,7 +864,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'haematology',
         name: 'Dr. Ngozi Eze',
-        email: 'haematology@histo.ng',
+        email: 'haematology@lagoslab.ng',
         password: 'Haematology#2026',
         role: 'SCIENTIST',
         subspecialties: [],
@@ -873,7 +873,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'microbiology',
         name: 'Dr. Ada Nwosu',
-        email: 'microbiology@histo.ng',
+        email: 'microbiology@lagoslab.ng',
         password: 'Microbiology#2026',
         role: 'SCIENTIST',
         subspecialties: [],
@@ -882,7 +882,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'tech',
         name: 'Chiamaka Uche',
-        email: 'technologist@histo.ng',
+        email: 'technologist@lagoslab.ng',
         password: 'Technologist#2026',
         role: 'TECHNOLOGIST',
         subspecialties: [],
@@ -890,7 +890,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'path1',
         name: 'Dr Adaeze Okafor',
-        email: 'pathologist@histo.ng',
+        email: 'pathologist@lagoslab.ng',
         password: 'Pathologist#2026',
         role: 'PATHOLOGIST',
         subspecialties: ['Breast', 'Gastrointestinal'],
@@ -898,7 +898,7 @@ export async function seedDatabase(): Promise<void> {
       {
         key: 'path2',
         name: 'Dr Emeka Nwosu',
-        email: 'pathologist2@histo.ng',
+        email: 'pathologist2@lagoslab.ng',
         password: 'Pathologist#2026',
         role: 'PATHOLOGIST',
         subspecialties: ['Urology', 'Gynaecology'],
@@ -1849,7 +1849,7 @@ export async function seedDatabase(): Promise<void> {
     await lab.save();
 
     console.log('');
-    console.log('Seed complete — Lagos Central Histopathology Laboratory');
+    console.log('Seed complete — Lagos Central Medical Laboratory');
     console.log('────────────────────────────────────────────────────────');
     console.log(`Lab code: ${LAB_CODE}`);
     console.log(

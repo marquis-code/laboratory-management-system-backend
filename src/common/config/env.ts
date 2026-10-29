@@ -69,7 +69,7 @@ const envSchema = z
     FHIR_ENABLED: boolFromEnv('true'),
     HL7_ENABLED: boolFromEnv('false'),
     HL7_MLLP_PORT: z.coerce.number().int().min(1).max(65_535).default(2575),
-    HL7_LAB_CODE: z.string().min(2).max(32).default('HISTO'),
+    HL7_LAB_CODE: z.string().min(2).max(32).default('LAGOS'),
     HL7_ALLOWED_IPS: z.string().optional(),
     WSI_WEBHOOK_SECRET: z.string().min(16).optional(),
     PAYMENTS_MODE: z.enum(['mock', 'live']).default('mock'),

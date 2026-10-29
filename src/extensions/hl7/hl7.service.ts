@@ -40,7 +40,7 @@ export class Hl7Service {
     } catch (error) {
       return this.errorAck('', error instanceof Error ? error.message : 'Invalid HL7 message.');
     }
-    const labCode = this.config.get<string>('HL7_LAB_CODE') ?? 'HISTO';
+    const labCode = this.config.get<string>('HL7_LAB_CODE') ?? 'LAGOS';
     const lab = await this.labModel.findOne({ code: labCode.toUpperCase(), active: true }).exec();
     if (!lab) return this.errorAck(parsed.controlId, 'HL7 laboratory is not configured.');
 

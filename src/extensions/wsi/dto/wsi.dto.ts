@@ -42,7 +42,7 @@ export class LinkWsiDto {
 }
 
 export class WsiWebhookDto {
-  @ApiPropertyOptional({ example: 'HISTO' })
+  @ApiPropertyOptional({ example: 'LAGOS' })
   @IsOptional()
   @IsString()
   @MaxLength(32)

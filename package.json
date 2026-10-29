@@ -20,7 +20,9 @@
     "migrate:phase15": "ts-node src/migrations/phase15-backfill.ts",
     "migrate:phase15:dist": "node dist/migrations/phase15-backfill.js",
     "seed:demo-users": "ts-node src/seed/demo-users.ts",
-    "seed:demo-users:dist": "node dist/seed/demo-users.js"
+    "seed:demo-users:dist": "node dist/seed/demo-users.js",
+    "migrate:demo-tenant": "ts-node src/migrations/demo-tenant-rename.ts",
+    "migrate:demo-tenant:dist": "node dist/migrations/demo-tenant-rename.js"
   },
   "dependencies": {
     "@lims/shared": "workspace:*",
