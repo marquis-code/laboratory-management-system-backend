@@ -24,7 +24,7 @@ async function bootstrap(): Promise<void> {
   const nodeEnv = config.get<string>('NODE_ENV') ?? 'development';
   const port = Number(process.env.PORT ?? config.get<number>('API_PORT') ?? 4000);
   const prefix = config.get<string>('API_PREFIX') ?? 'api';
-  const origins = (config.get<string>('CORS_ORIGINS') ?? 'http://localhost:3000')
+  const origins = (config.get<string>('CORS_ORIGINS') ?? '*')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -34,18 +34,23 @@ async function bootstrap(): Promise<void> {
     helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }),
   );
   app.use(compression());
+  const allowAllOrigins = origins.includes('*');
   app.enableCors({
-    origin: origins,
+    origin: allowAllOrigins ? true : origins,
     credentials: false,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'x-request-id',
-      'idempotency-key',
-      'x-fhir-api-key',
-      'x-wsi-signature',
-    ],
+    allowedHeaders: allowAllOrigins
+      ? '*'
+      : [
+          'Content-Type',
+          'Authorization',
+          'x-request-id',
+          'idempotency-key',
+          'x-fhir-api-key',
+          'x-wsi-signature',
+          'x-lab-code',
+          'x-portal-token',
+        ],
     exposedHeaders: ['x-request-id', 'Content-Disposition'],
     maxAge: 86_400,
   });

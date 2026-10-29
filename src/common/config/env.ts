@@ -12,7 +12,7 @@ const envSchema = z
     PORT: z.coerce.number().int().min(1).max(65_535).optional(),
     API_PORT: z.coerce.number().int().min(1).max(65_535).default(4000),
     API_PREFIX: z.string().min(1).max(40).default('api'),
-    CORS_ORIGINS: z.string().default('http://localhost:3000'),
+    CORS_ORIGINS: z.string().default('*'),
     PUBLIC_WEB_URL: z.string().url().default('http://localhost:3000'),
     PUBLIC_API_URL: z.string().url().default('http://localhost:4000/api'),
     SWAGGER_ENABLED: boolFromEnv('false'),
@@ -111,11 +111,12 @@ const envSchema = z
           message: 'SEED_RESET must be false in production.',
         });
       }
-      if (!value.CORS_ORIGINS.split(',').every((origin) => origin.trim().startsWith('https://'))) {
+      const corsOrigins = value.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean);
+      if (!corsOrigins.includes('*') && !corsOrigins.every((origin) => origin.startsWith('https://'))) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['CORS_ORIGINS'],
-          message: 'Production CORS_ORIGINS must contain only HTTPS origins.',
+          message: 'Production CORS_ORIGINS must contain HTTPS origins or "*".',
         });
       }
       if (
