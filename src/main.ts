@@ -64,10 +64,10 @@ async function bootstrap(): Promise<void> {
 
   if (config.get<boolean>('SWAGGER_ENABLED')) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Histopathology LIMS API')
+      .setTitle('Laboratory LIMS API')
       .setDescription(
         [
-          'Block-and-slide level laboratory information management for hospital histopathology departments.',
+          'Multi-discipline laboratory information management for hospital and standalone laboratories.',
           '',
           '**Tenancy** — every authenticated request is scoped to the laboratory in the JWT. There is no labId parameter.',
           '',
@@ -114,7 +114,7 @@ async function bootstrap(): Promise<void> {
     });
     SwaggerModule.setup('docs', app, document, {
       swaggerOptions: { persistAuthorization: true, docExpansion: 'none', filter: true },
-      customSiteTitle: 'Histopathology LIMS API',
+      customSiteTitle: 'Laboratory LIMS API',
     });
   }
 
@@ -137,7 +137,7 @@ async function bootstrap(): Promise<void> {
 
   await app.listen(port, '0.0.0.0');
   logger.log(
-    `Histopathology LIMS API ready on http://localhost:${port}/${prefix} (${nodeEnv})` +
+    `Laboratory LIMS API ready on http://localhost:${port}/${prefix} (${nodeEnv})` +
       (config.get<boolean>('SWAGGER_ENABLED') ? ` — docs at http://localhost:${port}/docs` : ''),
   );
 }
