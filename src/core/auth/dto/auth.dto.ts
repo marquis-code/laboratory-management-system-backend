@@ -3,14 +3,14 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ example: 'HISTO' })
+  @ApiProperty({ example: 'LAGOS' })
   @IsString()
   @MinLength(2)
   @MaxLength(32)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
   labCode!: string;
 
-  @ApiProperty({ example: 'pathologist@histo.ng' })
+  @ApiProperty({ example: 'pathologist@lagoslab.ng' })
   @IsEmail()
   @MaxLength(160)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))

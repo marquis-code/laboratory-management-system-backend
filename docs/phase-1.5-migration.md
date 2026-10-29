@@ -48,7 +48,7 @@ status, priority, requestedBy, requestedAt, createdAt, updatedAt
 
 Indexes: unique `(labId, caseId, discipline, code)`, `(labId, discipline, status, priority)`, `(labId, accessionNumber)`.
 
-Every new accession creates one request for the selected discipline (default `HISTOPATHOLOGY`, code `HISTO`). The case status remains authoritative. The request status is a projection: `RECEIVED`, `IN_PROGRESS`, `PENDING_REVIEW`, `VERIFIED`, `RELEASED`.
+Every new accession creates one request for the selected discipline (default `HISTOPATHOLOGY`, code `LAGOS`). The case status remains authoritative. The request status is a projection: `RECEIVED`, `IN_PROGRESS`, `PENDING_REVIEW`, `VERIFIED`, `RELEASED`.
 
 ### New/updated fields
 
@@ -104,7 +104,7 @@ The script:
 
 - sets `labs.enabledDisciplines = ["HISTOPATHOLOGY"]` and `labs.accessionPrefixes = {}` when absent;
 - adds `disciplines = ["HISTOPATHOLOGY"]` to existing clinical users with none;
-- creates one `HISTOPATHOLOGY/HISTO` test request per case that has none, deriving status from the case.
+- creates one `HISTOPATHOLOGY/LAGOS` test request per case that has none, deriving status from the case.
 
 4. Deploy the web app. Navigation filters histology items when the lab/user cannot access them; existing labs remain histology-enabled.
 5. Run `pnpm seed:reset` only in demo/test environments. Production never needs a reseed.

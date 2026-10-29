@@ -13,8 +13,8 @@ Phase 6 completes the integration surface. Most baseline adapters existed earlie
 Example:
 
 ```bash
-LIMS_URL=http://localhost:4000/api LIMS_LAB_CODE=HISTO \
-LIMS_EMAIL=scientist@histo.ng LIMS_PASSWORD='Scientist#2026' \
+LIMS_URL=http://localhost:4000/api LIMS_LAB_CODE=LAGOS \
+LIMS_EMAIL=scientist@lagoslab.ng LIMS_PASSWORD='Scientist#2026' \
 node lmis-api/connector/index.mjs --protocol ASTM --file analyzer.astm
 ```
 

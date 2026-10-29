@@ -22,7 +22,7 @@ export class CreateUserDto {
   @MaxLength(150)
   name!: string;
 
-  @ApiProperty({ example: 'pathologist@histo.ng' })
+  @ApiProperty({ example: 'pathologist@lagoslab.ng' })
   @IsEmail()
   @MaxLength(160)
   email!: string;

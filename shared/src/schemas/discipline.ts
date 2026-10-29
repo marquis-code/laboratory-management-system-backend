@@ -6,7 +6,7 @@ export const disciplineSchema = z.enum(DISCIPLINES);
 
 export const testRequestSchema = z.object({
   discipline: disciplineSchema.default('HISTOPATHOLOGY'),
-  code: z.string().trim().min(1).max(80).default('HISTO'),
+  code: z.string().trim().min(1).max(80).default('LAGOS'),
   name: z.string().trim().min(1).max(160).default('Histopathology examination'),
 });
 export type TestRequestInput = z.infer<typeof testRequestSchema>;

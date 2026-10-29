@@ -71,8 +71,8 @@ All platform endpoints are `SUPER_ADMIN`-only. Invitations are single-use, hashe
 
 ## Demo
 
-- Super administrator: `superadmin@histo.ng` / `SuperAdmin#2026` at `/super-admin`
-- Laboratory administrator: `admin@histo.ng` / `LabAdmin#2026` at `/admin`
+- Super administrator: `superadmin@lagoslab.ng` / `SuperAdmin#2026` at `/super-admin`
+- Laboratory administrator: `admin@lagoslab.ng` / `LabAdmin#2026` at `/admin`
 - Seeded organization: **Lagos Central Health Group**, hospital type, Enterprise plan, linked to the demo laboratory.
 
 ## Tests
