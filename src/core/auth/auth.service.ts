@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model } from 'mongoose';
+import { Connection, type HydratedDocument, Model } from 'mongoose';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { verify } from 'jsonwebtoken';
 import type { AuthResponse, Lab, User } from '@lims/shared';
@@ -13,7 +13,7 @@ import {
   type AuthenticatedUser,
   type RefreshTokenPayload,
 } from '../../common/auth/authenticated-user';
-import { runWithTenant } from '../../common/context/tenant-context';
+import { runWithSystemTenant, runWithTenant } from '../../common/context/tenant-context';
 import { hashPassword, hashToken, verifyPassword } from '../../common/utils/crypto';
 import { toLab, toUser } from '../../common/serializers/entities';
 import { AuditService } from '../audit/audit.service';
@@ -47,30 +47,86 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponse> {
-    const lab = await this.labModel
-      .findOne({ code: dto.labCode.toUpperCase(), active: true })
-      .exec();
-    if (!lab) throw new UnauthorizedException('Invalid laboratory code, email or password.');
-    if (lab.organizationId) {
-      const organization = await this.organizationModel.findById(lab.organizationId).exec();
-      if (organization?.status === 'SUSPENDED')
-        throw new UnauthorizedException('This organization is suspended.');
+    let lab: LabEntity | null = null;
+    let targetUser: HydratedDocument<UserEntity> | null = null;
+
+    if (dto.labCode) {
+      lab = await this.labModel
+        .findOne({ code: dto.labCode.toUpperCase(), active: true })
+        .exec();
+      if (!lab) throw new UnauthorizedException('Invalid laboratory code, email or password.');
+      if (lab.organizationId) {
+        const organization = await this.organizationModel.findById(lab.organizationId).exec();
+        if (organization?.status === 'SUSPENDED')
+          throw new UnauthorizedException('This organization is suspended.');
+      }
+
+      const labId = lab._id.toString();
+      targetUser = await runWithTenant({ labId }, async () => {
+        return this.userModel
+          .findOne({ email: dto.email.toLowerCase() })
+          .select('+passwordHash')
+          .exec();
+      });
+
+      if (!targetUser || !targetUser.active) {
+        throw new UnauthorizedException('Invalid laboratory code, email or password.');
+      }
+      const valid = await verifyPassword(dto.password, targetUser.passwordHash);
+      if (!valid) {
+        throw new UnauthorizedException('Invalid laboratory code, email or password.');
+      }
+    } else {
+      // Platform / super administrator login without a laboratory code
+      const candidates = await runWithSystemTenant('platform-login-lookup', 'system', async () => {
+        return this.userModel
+          .find({ email: dto.email.toLowerCase(), active: true })
+          .select('+passwordHash')
+          .exec();
+      });
+
+      if (!candidates || candidates.length === 0) {
+        throw new UnauthorizedException('Invalid email or password.');
+      }
+
+      // Prioritize SUPER_ADMIN accounts first if multiple accounts share an email
+      const sortedCandidates = [...candidates].sort((a, b) => {
+        if (a.role === 'SUPER_ADMIN') return -1;
+        if (b.role === 'SUPER_ADMIN') return 1;
+        return 0;
+      });
+
+      for (const candidate of sortedCandidates) {
+        const valid = await verifyPassword(dto.password, candidate.passwordHash);
+        if (valid) {
+          targetUser = candidate;
+          break;
+        }
+      }
+
+      if (!targetUser) {
+        throw new UnauthorizedException('Invalid email or password.');
+      }
+
+      if (targetUser.labId) {
+        lab = await this.labModel.findById(targetUser.labId).exec();
+      }
+      if (!lab) {
+        lab = await this.labModel.findOne({ active: true }).exec();
+      }
+      if (!lab) {
+        throw new UnauthorizedException('No active laboratory available for platform administration.');
+      }
+      if (lab.organizationId) {
+        const organization = await this.organizationModel.findById(lab.organizationId).exec();
+        if (organization?.status === 'SUSPENDED')
+          throw new UnauthorizedException('This organization is suspended.');
+      }
     }
 
     const labId = lab._id.toString();
     return runWithTenant({ labId }, async () => {
-      const user = await this.userModel
-        .findOne({ email: dto.email.toLowerCase() })
-        .select('+passwordHash')
-        .exec();
-      if (!user || !user.active) {
-        throw new UnauthorizedException('Invalid laboratory code, email or password.');
-      }
-      const valid = await verifyPassword(dto.password, user.passwordHash);
-      if (!valid) {
-        throw new UnauthorizedException('Invalid laboratory code, email or password.');
-      }
-
+      const user = targetUser!;
       const tokens = await this.signTokens(user);
       user.refreshTokenHash = hashToken(tokens.refreshToken);
       user.lastLoginAt = new Date();
@@ -80,14 +136,14 @@ export class AuthService {
         action: 'LOGIN',
         entityType: 'User',
         entityId: user._id.toString(),
-        metadata: { labCode: lab.code },
+        metadata: { labCode: lab!.code },
         actor: { userId: user._id.toString(), userName: user.name, userRole: user.role },
       });
 
       return {
         ...tokens,
         user: toUser(user),
-        lab: toLab(lab),
+        lab: toLab(lab!),
       };
     });
   }

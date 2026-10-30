@@ -1,14 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ example: 'LAGOS' })
+  @ApiProperty({ example: 'LAGOS', required: false })
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(32)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
-  labCode!: string;
+  labCode?: string;
 
   @ApiProperty({ example: 'pathologist@lagoslab.ng' })
   @IsEmail()

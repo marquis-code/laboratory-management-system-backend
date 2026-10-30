@@ -230,6 +230,102 @@ export class PlatformService {
     });
   }
 
+  async platformLabs(actor: AuthenticatedUser): Promise<Record<string, unknown>[]> {
+    return runWithSystemTenant('super-admin-labs', actor.labId, async () => {
+      const labs = await this.connection.collection('labs').find({}).sort({ name: 1 }).toArray();
+      const orgIds = labs.map((lab) => lab.organizationId).filter(Boolean);
+      const organizations = await this.connection
+        .collection('organizations')
+        .find({ _id: { $in: orgIds } })
+        .toArray();
+      const orgById = new Map(organizations.map((org) => [String(org._id), org]));
+      const labIds = labs.map((lab) => lab._id);
+      const [userCounts, caseCounts] = await Promise.all([
+        this.connection
+          .collection('users')
+          .aggregate([{ $match: { labId: { $in: labIds }, active: true } }, { $group: { _id: '$labId', count: { $sum: 1 } } }])
+          .toArray(),
+        this.connection
+          .collection('cases')
+          .aggregate([{ $match: { labId: { $in: labIds } } }, { $group: { _id: '$labId', count: { $sum: 1 } } }])
+          .toArray(),
+      ]);
+      const userMap = new Map(userCounts.map((row) => [String(row._id), row.count]));
+      const caseMap = new Map(caseCounts.map((row) => [String(row._id), row.count]));
+      return labs.map((lab) => {
+        const org = lab.organizationId ? orgById.get(String(lab.organizationId)) : null;
+        return {
+          id: String(lab._id),
+          code: lab.code,
+          name: lab.name,
+          active: lab.active !== false,
+          organizationId: lab.organizationId ? String(lab.organizationId) : null,
+          organizationName: org?.name ?? 'Standalone laboratory',
+          organizationCode: org?.code ?? null,
+          plan: org?.plan ?? 'STANDALONE',
+          enabledDisciplines: lab.enabledDisciplines ?? [],
+          accessionPrefix: lab.accessionPrefix ?? null,
+          timezone: lab.timezone ?? null,
+          currency: lab.currency ?? null,
+          users: userMap.get(String(lab._id)) ?? 0,
+          cases: caseMap.get(String(lab._id)) ?? 0,
+          createdAt: lab.createdAt ?? null,
+        };
+      });
+    });
+  }
+
+  async platformUsers(actor: AuthenticatedUser): Promise<Record<string, unknown>[]> {
+    return runWithSystemTenant('super-admin-users', actor.labId, async () => {
+      const [users, labs] = await Promise.all([
+        this.connection.collection('users').find({}).sort({ createdAt: -1 }).limit(1000).toArray(),
+        this.connection.collection('labs').find({}).toArray(),
+      ]);
+      const labMap = new Map(labs.map((lab) => [String(lab._id), lab]));
+      return users.map((user) => {
+        const lab = labMap.get(String(user.labId));
+        return {
+          id: String(user._id),
+          name: user.name,
+          email: user.email,
+          phone: user.phone ?? null,
+          role: user.role,
+          active: user.active !== false,
+          disciplines: user.disciplines ?? [],
+          labId: user.labId ? String(user.labId) : null,
+          labCode: lab?.code ?? null,
+          labName: lab?.name ?? null,
+          lastLoginAt: user.lastLoginAt ?? null,
+          mustChangePassword: Boolean(user.mustChangePassword),
+          createdAt: user.createdAt ?? null,
+        };
+      });
+    });
+  }
+
+  async platformAudit(actor: AuthenticatedUser): Promise<Record<string, unknown>[]> {
+    return runWithSystemTenant('super-admin-audit', actor.labId, async () => {
+      const rows = await this.connection
+        .collection('audit_logs')
+        .find({})
+        .sort({ createdAt: -1 })
+        .limit(250)
+        .toArray();
+      return rows.map((row) => ({
+        id: String(row._id),
+        action: row.action,
+        entityType: row.entityType,
+        entityId: row.entityId ?? null,
+        caseId: row.caseId ?? null,
+        userName: row.userName ?? 'System',
+        userRole: row.userRole ?? null,
+        labId: row.labId ? String(row.labId) : null,
+        metadata: row.metadata ?? {},
+        createdAt: row.createdAt ?? null,
+      }));
+    });
+  }
+
   async organizations(actor: AuthenticatedUser): Promise<Organization[]> {
     return runWithSystemTenant('super-admin-orgs', actor.labId, async () => {
       const rows = await this.organizationModel.find({}).sort({ createdAt: -1 }).exec();

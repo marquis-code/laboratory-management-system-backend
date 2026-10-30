@@ -34,7 +34,7 @@ async function bootstrap(): Promise<void> {
     helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }),
   );
   app.use(compression());
-  const allowAllOrigins = origins.includes('*');
+  const allowAllOrigins = origins.includes('*') || origins.length === 0 || origins.includes('all');
   app.enableCors({
     origin: allowAllOrigins ? true : origins,
     credentials: false,
@@ -51,7 +51,7 @@ async function bootstrap(): Promise<void> {
           'x-lab-code',
           'x-portal-token',
         ],
-    exposedHeaders: ['x-request-id', 'Content-Disposition'],
+    exposedHeaders: ['*'],
     maxAge: 86_400,
   });
   app.setGlobalPrefix(prefix);

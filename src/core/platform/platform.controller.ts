@@ -17,6 +17,21 @@ export class PlatformController {
     return this.platform.overview(user);
   }
 
+  @Get('labs')
+  labs(@CurrentUser() user: AuthenticatedUser) {
+    return this.platform.platformLabs(user);
+  }
+
+  @Get('users')
+  users(@CurrentUser() user: AuthenticatedUser) {
+    return this.platform.platformUsers(user);
+  }
+
+  @Get('audit')
+  audit(@CurrentUser() user: AuthenticatedUser) {
+    return this.platform.platformAudit(user);
+  }
+
   @Get('organizations')
   organizations(@CurrentUser() user: AuthenticatedUser) {
     return this.platform.organizations(user);
