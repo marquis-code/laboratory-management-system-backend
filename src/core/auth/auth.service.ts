@@ -33,6 +33,49 @@ export interface MeResponse {
   lab: Lab;
 }
 
+function createPlatformLab(email: string, baseLab?: LabEntity | null): Lab {
+  if (baseLab) {
+    const serialized = toLab(baseLab);
+    return {
+      ...serialized,
+      id: 'platform',
+      code: 'PLATFORM',
+      name: 'Platform Administration',
+    };
+  }
+  return {
+    id: 'platform',
+    code: 'PLATFORM',
+    name: 'Platform Administration',
+    address: null,
+    phone: null,
+    email: email,
+    accessionPrefix: 'PLT',
+    accessionFormat: 'PLT-{YYYY}-{SEQ:6}',
+    tatHours: { FROZEN: 1, URGENT: 24, ROUTINE: 72 },
+    tatWarningPercent: 80,
+    timezone: 'Africa/Lagos',
+    qaSamplingPercent: 10,
+    currency: 'NGN',
+    enabledDisciplines: ['HISTOPATHOLOGY', 'HAEMATOLOGY', 'CHEMICAL_PATHOLOGY', 'MICROBIOLOGY'],
+    accessionPrefixes: {},
+    organizationId: null,
+    onboardingCompletedAt: new Date().toISOString(),
+    letterhead: {
+      phone: null,
+      email: email,
+      website: null,
+      pathologistName: null,
+      pathologistTitle: null,
+      qualifications: null,
+      signatureText: null,
+      footerNote: null,
+    },
+    active: true,
+    createdAt: new Date().toISOString(),
+  };
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -124,8 +167,13 @@ export class AuthService {
       }
     }
 
-    const labId = lab._id.toString();
-    return runWithTenant({ labId }, async () => {
+    const isSuperAdmin = targetUser.role === 'SUPER_ADMIN';
+    const labId = targetUser.labId?.toString() || lab?._id?.toString() || 'platform';
+    const tenantStore = isSuperAdmin
+      ? { labId, system: true, reason: 'superadmin-session' }
+      : { labId };
+
+    return runWithTenant(tenantStore, async () => {
       const user = targetUser!;
       const tokens = await this.signTokens(user);
       user.refreshTokenHash = hashToken(tokens.refreshToken);
@@ -136,14 +184,21 @@ export class AuthService {
         action: 'LOGIN',
         entityType: 'User',
         entityId: user._id.toString(),
-        metadata: { labCode: lab!.code },
+        metadata: {
+          platformScope: isSuperAdmin,
+          labCode: isSuperAdmin ? 'PLATFORM' : lab?.code,
+        },
         actor: { userId: user._id.toString(), userName: user.name, userRole: user.role },
       });
+
+      const labPayload: Lab = isSuperAdmin
+        ? createPlatformLab(user.email, lab)
+        : toLab(lab!);
 
       return {
         ...tokens,
         user: toUser(user),
-        lab: toLab(lab!),
+        lab: labPayload,
       };
     });
   }
@@ -217,31 +272,52 @@ export class AuthService {
       throw new UnauthorizedException('Session expired. Sign in again.');
     }
 
-    return runWithTenant({ labId: payload.labId }, async () => {
-      const user = await this.userModel.findById(payload.sub).select('+refreshTokenHash').exec();
-      if (!user || !user.active || !user.refreshTokenHash) {
-        throw new UnauthorizedException('Session expired. Sign in again.');
-      }
-      const providedHash = hashToken(refreshToken);
-      const expected = Buffer.from(user.refreshTokenHash, 'utf8');
-      const provided = Buffer.from(providedHash, 'utf8');
-      if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
-        throw new UnauthorizedException('Session expired. Sign in again.');
-      }
+    const user = await runWithSystemTenant('refresh-lookup', 'platform', () =>
+      this.userModel.findById(payload.sub).select('+refreshTokenHash').exec(),
+    );
+    if (!user || !user.active || !user.refreshTokenHash) {
+      throw new UnauthorizedException('Session expired. Sign in again.');
+    }
+    const providedHash = hashToken(refreshToken);
+    const expected = Buffer.from(user.refreshTokenHash, 'utf8');
+    const provided = Buffer.from(providedHash, 'utf8');
+    if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+      throw new UnauthorizedException('Session expired. Sign in again.');
+    }
 
+    const isSuperAdmin = user.role === 'SUPER_ADMIN';
+    const labId = user.labId?.toString() || payload.labId || 'platform';
+    const tenantStore = isSuperAdmin
+      ? { labId, system: true, reason: 'superadmin-refresh' }
+      : { labId };
+
+    return runWithTenant(tenantStore, async () => {
       const tokens = await this.signTokens(user);
       user.refreshTokenHash = hashToken(tokens.refreshToken);
       await user.save();
 
-      const lab = await this.labModel.findById(user.labId).exec();
-      if (!lab) throw new UnauthorizedException('Laboratory is no longer available.');
+      let lab: LabEntity | null = null;
+      if (user.labId) {
+        lab = await this.labModel.findById(user.labId).exec();
+      }
+      if (!lab && !isSuperAdmin) {
+        throw new UnauthorizedException('Laboratory is no longer available.');
+      }
 
-      return { ...tokens, user: toUser(user), lab: toLab(lab) };
+      const labPayload: Lab = isSuperAdmin
+        ? createPlatformLab(user.email, lab)
+        : toLab(lab!);
+
+      return { ...tokens, user: toUser(user), lab: labPayload };
     });
   }
 
   async logout(user: AuthenticatedUser): Promise<{ success: true }> {
-    const stored = await this.userModel.findById(user.id).exec();
+    const isSuperAdmin = user.role === 'SUPER_ADMIN';
+    const runLookup = () => this.userModel.findById(user.id).exec();
+    const stored = isSuperAdmin
+      ? await runWithSystemTenant('logout-lookup', 'platform', runLookup)
+      : await runLookup();
     if (stored) {
       stored.refreshTokenHash = null;
       await stored.save();
@@ -255,8 +331,19 @@ export class AuthService {
   }
 
   async me(userId: string): Promise<MeResponse> {
-    const user = await this.userModel.findById(userId).exec();
+    const user = await runWithSystemTenant('me-lookup', 'platform', () =>
+      this.userModel.findById(userId).exec(),
+    );
     if (!user) throw new UnauthorizedException('Account not found.');
+
+    if (user.role === 'SUPER_ADMIN') {
+      const lab = user.labId ? await this.labModel.findById(user.labId).exec() : null;
+      return {
+        user: toUser(user),
+        lab: createPlatformLab(user.email, lab),
+      };
+    }
+
     const lab = await this.labModel.findById(user.labId).exec();
     if (!lab) throw new UnauthorizedException('Laboratory is no longer available.');
     return { user: toUser(user), lab: toLab(lab) };
@@ -267,8 +354,9 @@ export class AuthService {
     const refreshSecret = this.config.getOrThrow<string>('JWT_REFRESH_SECRET');
     const accessTtl = parseTtlSeconds(this.config.getOrThrow<string>('JWT_ACCESS_TTL'), 900);
     const refreshTtl = parseTtlSeconds(this.config.getOrThrow<string>('JWT_REFRESH_TTL'), 604_800);
-    const labId = user.labId.toString();
-    const lab = await this.labModel.findById(user.labId).exec();
+    const isSuperAdmin = user.role === 'SUPER_ADMIN';
+    const labId = user.labId?.toString() || 'platform';
+    const lab = user.labId ? await this.labModel.findById(user.labId).exec() : null;
 
     const accessPayload: AccessTokenPayload = {
       sub: user._id.toString(),
@@ -277,7 +365,9 @@ export class AuthService {
       email: user.email,
       role: user.role,
       disciplines: user.disciplines ?? [],
-      labEnabledDisciplines: lab?.enabledDisciplines ?? ['HISTOPATHOLOGY'],
+      labEnabledDisciplines: isSuperAdmin
+        ? ['HISTOPATHOLOGY', 'HAEMATOLOGY', 'CHEMICAL_PATHOLOGY', 'MICROBIOLOGY']
+        : lab?.enabledDisciplines ?? ['HISTOPATHOLOGY'],
       type: 'access',
     };
     const refreshPayload: RefreshTokenPayload = {

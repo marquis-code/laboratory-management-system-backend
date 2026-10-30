@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user';
 import { isAccessTokenPayload } from '../../common/auth/authenticated-user';
-import { runWithTenant } from '../../common/context/tenant-context';
+import { runWithSystemTenant, runWithTenant } from '../../common/context/tenant-context';
 import { UserModelName, type UserEntity } from '../users/user.schema';
 import { LabModelName, type LabEntity } from '../labs/lab.schema';
 
@@ -27,6 +27,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: unknown): Promise<AuthenticatedUser> {
     if (!isAccessTokenPayload(payload)) {
       throw new UnauthorizedException('Invalid access token.');
+    }
+
+    const isSuperAdmin = payload.role === 'SUPER_ADMIN';
+
+    if (isSuperAdmin) {
+      const user = await runWithSystemTenant('superadmin-validate', 'platform', () =>
+        this.userModel.findById(payload.sub).exec(),
+      );
+      if (!user || !user.active) {
+        throw new UnauthorizedException('Account is inactive or unavailable.');
+      }
+
+      return {
+        id: user._id.toString(),
+        labId: user.labId?.toString() || 'platform',
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subspecialties: user.subspecialties,
+        disciplines: user.disciplines ?? [],
+        labEnabledDisciplines: ['HISTOPATHOLOGY', 'HAEMATOLOGY', 'CHEMICAL_PATHOLOGY', 'MICROBIOLOGY'],
+      };
     }
 
     const [user, lab] = await runWithTenant({ labId: payload.labId }, () =>

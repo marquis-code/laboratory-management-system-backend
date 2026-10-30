@@ -316,6 +316,17 @@ export async function seedPhase2(connection: Connection, lab: SeedLab, now: Date
         formula: null,
       },
     ]),
+    test(labId, 'HISTOPATHOLOGY', 'HPE', 'Histopathology examination', 'Tissue in formalin', [
+      { key: 'diagnosis', name: 'Diagnosis', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      { key: 'grade', name: 'Grade', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+    ]),
+    test(labId, 'HISTOPATHOLOGY', 'CYTO', 'Cytology examination', 'Cytology specimen', [
+      { key: 'interpretation', name: 'Interpretation', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+    ]),
+    test(labId, 'MICROBIOLOGY', 'MICRO', 'Urine culture and susceptibility', 'Midstream urine', [
+      { key: 'organism', name: 'Organism isolated', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      { key: 'susceptibility', name: 'Susceptibility profile', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+    ]),
   ];
   await connection.collection('test_definitions').insertMany(tests);
 

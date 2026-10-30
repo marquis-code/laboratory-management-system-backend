@@ -22,7 +22,9 @@
     "seed:demo-users": "ts-node src/seed/demo-users.ts",
     "seed:demo-users:dist": "node dist/seed/demo-users.js",
     "migrate:demo-tenant": "ts-node src/migrations/demo-tenant-rename.ts",
-    "migrate:demo-tenant:dist": "node dist/migrations/demo-tenant-rename.js"
+    "migrate:demo-tenant:dist": "node dist/migrations/demo-tenant-rename.js",
+    "seed:demo-catalogue": "ts-node src/seed/demo-catalogue.ts",
+    "seed:demo-catalogue:dist": "node dist/seed/demo-catalogue.js"
   },
   "dependencies": {
     "@lims/shared": "workspace:*",

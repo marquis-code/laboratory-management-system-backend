@@ -53,12 +53,15 @@ export class TenantMiddleware implements NestMiddleware {
         next();
         return;
       }
+      const isSuperAdmin = payload.role === 'SUPER_ADMIN';
       runWithTenant(
         {
           labId: payload.labId,
           userId: payload.sub,
           userName: payload.name,
           userRole: payload.role,
+          system: isSuperAdmin,
+          reason: isSuperAdmin ? 'platform-super-admin' : undefined,
         },
         () => next(),
       );

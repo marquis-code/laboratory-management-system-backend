@@ -178,6 +178,52 @@ function starterTests() {
         },
       ],
     },
+    {
+      discipline: 'HISTOPATHOLOGY',
+      code: 'HPE',
+      name: 'Histopathology examination',
+      specimenType: 'Tissue in formalin',
+      method: 'Gross examination and microscopy',
+      analytes: [
+        { key: 'diagnosis', name: 'Diagnosis', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+        { key: 'grade', name: 'Grade', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+        { key: 'margins', name: 'Margin status', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      ],
+    },
+    {
+      discipline: 'HISTOPATHOLOGY',
+      code: 'CYTO',
+      name: 'Cytology examination',
+      specimenType: 'Cytology specimen',
+      method: 'Microscopy',
+      analytes: [
+        { key: 'adequacy', name: 'Specimen adequacy', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+        { key: 'interpretation', name: 'Interpretation', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      ],
+    },
+    {
+      discipline: 'MICROBIOLOGY',
+      code: 'MICRO',
+      name: 'Urine culture and susceptibility',
+      specimenType: 'Midstream urine',
+      method: 'Culture and AST',
+      analytes: [
+        { key: 'organism', name: 'Organism isolated', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+        { key: 'colonyCount', name: 'Colony count', unit: 'CFU/mL', resultType: 'NUMERIC', decimals: 1, required: false, referenceRanges: [], formula: null },
+        { key: 'susceptibility', name: 'Susceptibility profile', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      ],
+    },
+    {
+      discipline: 'MICROBIOLOGY',
+      code: 'BLOOD-CULTURE',
+      name: 'Blood culture',
+      specimenType: 'Blood culture bottles',
+      method: 'Automated culture',
+      analytes: [
+        { key: 'organism', name: 'Organism isolated', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+        { key: 'susceptibility', name: 'Susceptibility profile', unit: null, resultType: 'TEXT', decimals: null, required: false, referenceRanges: [], formula: null },
+      ],
+    },
   ];
 }
 
